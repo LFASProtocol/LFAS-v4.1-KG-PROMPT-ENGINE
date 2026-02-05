@@ -36,6 +36,46 @@ const INITIAL_KG: KnowledgeGraph = {
   ]
 };
 
+// Reusable Header Component with "Mouse Activated" Hover Help
+const SectionHeader: React.FC<{
+  icon: React.ElementType;
+  title: string;
+  subtitle?: string;
+  helpText?: string;
+  rightElement?: React.ReactNode;
+}> = ({ icon: Icon, title, subtitle, helpText, rightElement }) => {
+  const [isHovering, setIsHovering] = useState(false);
+
+  return (
+    <div className="flex items-center justify-between mb-4 relative z-10">
+      <div className="flex items-center gap-2 text-indigo-300 relative group/header">
+        <Icon size={16} />
+        <h2 className="text-xs font-black uppercase tracking-widest">{title}</h2>
+        
+        {helpText && (
+          <div 
+            className="ml-1 cursor-help text-indigo-500/30 hover:text-indigo-400 transition-colors relative"
+            onMouseEnter={() => setIsHovering(true)}
+            onMouseLeave={() => setIsHovering(false)}
+          >
+            <HelpCircle size={12} />
+            {/* Hover Tooltip - Mouse Activated */}
+            <div className={`absolute left-full top-1/2 -translate-y-1/2 ml-3 w-56 bg-[#0a0a0a] border border-indigo-500/30 text-indigo-100 p-3 rounded-lg shadow-[0_4px_20px_rgba(99,102,241,0.25)] text-[10px] font-medium leading-relaxed z-50 pointer-events-none transition-all duration-200 origin-left ${isHovering ? 'opacity-100 scale-100 translate-x-0' : 'opacity-0 scale-95 -translate-x-2'}`}>
+              <div className="absolute left-0 top-1/2 -translate-x-[5px] -translate-y-1/2 w-2 h-2 bg-[#0a0a0a] border-l border-b border-indigo-500/30 transform rotate-45"></div>
+              <span className="text-indigo-400 font-bold block mb-1 uppercase text-[9px] tracking-wider">Info</span>
+              {helpText}
+            </div>
+          </div>
+        )}
+      </div>
+      <div className="flex items-center gap-3">
+         {subtitle && <div className="text-[10px] text-gray-600 font-mono">{subtitle}</div>}
+         {rightElement}
+      </div>
+    </div>
+  );
+};
+
 const App: React.FC = () => {
   const [kgJson, setKgJson] = useState(JSON.stringify(INITIAL_KG, null, 2));
   const [executionState, setExecutionState] = useState<ExecutionState>(ExecutionState.IDLE);
@@ -225,13 +265,13 @@ const App: React.FC = () => {
 
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500/20 via-purple-500/20 to-indigo-500/20 opacity-50"></div>
               
-              <div className="flex items-center justify-between mb-4 relative z-10">
-                <div className="flex items-center gap-2 text-indigo-300">
-                  <Database size={16} />
-                  <h2 className="text-xs font-black uppercase tracking-widest">Knowledge Graph (JSON)</h2>
-                </div>
-                <div className="text-[10px] text-gray-600 font-mono">Layer 1 Reference Data</div>
-              </div>
+              <SectionHeader 
+                icon={Database} 
+                title="Knowledge Graph (JSON)" 
+                subtitle="Layer 1 Reference Data"
+                helpText="Define your audit scenario here. The KG structure dictates the nodes (entities) and edges (relationships) that the AI will analyze."
+              />
+
               <textarea
                 value={kgJson}
                 onChange={(e) => setKgJson(e.target.value)}
@@ -280,22 +320,25 @@ const App: React.FC = () => {
 
             <div className="bg-[#0f0f0f] border border-gray-800/60 rounded-2xl p-6 shadow-xl h-[400px] flex flex-col relative">
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500/20 via-purple-500/20 to-indigo-500/20 opacity-50"></div>
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2 text-indigo-300">
-                  <Activity size={16} />
-                  <h2 className="text-xs font-black uppercase tracking-widest">Relationship Mapping</h2>
-                </div>
-                <div className="relative group">
-                  <input 
-                    type="text" 
-                    placeholder="Filter nodes..."
-                    value={filterTerm}
-                    onChange={(e) => setFilterTerm(e.target.value)}
-                    className="bg-[#080808] border border-gray-800 rounded-lg py-1 px-8 text-[10px] font-mono text-indigo-200 focus:border-indigo-500/50 outline-none w-32 focus:w-48 transition-all placeholder-gray-700"
-                  />
-                  <Filter size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within:text-indigo-400" />
-                </div>
-              </div>
+              
+              <SectionHeader 
+                icon={Activity} 
+                title="Relationship Mapping"
+                helpText="A live visualization of the Knowledge Graph nodes. Drag nodes to reorganize. Useful for verifying that your JSON structure makes sense visually."
+                rightElement={
+                  <div className="relative group">
+                    <input 
+                      type="text" 
+                      placeholder="Filter nodes..."
+                      value={filterTerm}
+                      onChange={(e) => setFilterTerm(e.target.value)}
+                      className="bg-[#080808] border border-gray-800 rounded-lg py-1 px-8 text-[10px] font-mono text-indigo-200 focus:border-indigo-500/50 outline-none w-32 focus:w-48 transition-all placeholder-gray-700"
+                    />
+                    <Filter size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within:text-indigo-400" />
+                  </div>
+                }
+              />
+
               <div className="flex-1 min-h-0">
                 <GraphVisualization kg={getKg() || INITIAL_KG} filterTerm={filterTerm} />
               </div>
@@ -316,10 +359,13 @@ const App: React.FC = () => {
             {/* Reflection Panel */}
             <div className="bg-[#0f0f0f] border border-gray-800/60 rounded-2xl p-6 shadow-xl relative">
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500/20 via-purple-500/20 to-indigo-500/20 opacity-50"></div>
-              <div className="flex items-center gap-2 text-indigo-300 mb-4">
-                <Terminal size={16} />
-                <h2 className="text-xs font-black uppercase tracking-widest">Protocol Header [REFLECT]</h2>
-              </div>
+              
+              <SectionHeader 
+                icon={Terminal} 
+                title="Protocol Header [REFLECT]"
+                helpText="Shows the AI's internal monologue and safety checks (Wait Gate) before it attempts to audit the transcript."
+              />
+
               <div className="bg-[#080808] border border-gray-800/60 rounded-xl p-6 min-h-[150px] font-mono text-sm leading-relaxed text-indigo-100/80">
                 {reflectionText ? (
                   <pre className="whitespace-pre-wrap">{reflectionText}</pre>
@@ -344,17 +390,17 @@ const App: React.FC = () => {
               />
 
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500/20 via-purple-500/20 to-indigo-500/20 opacity-50"></div>
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-2 text-indigo-300">
-                  <ShieldAlert size={16} />
-                  <h2 className="text-xs font-black uppercase tracking-widest">Execution Artifacts [ACT]</h2>
-                </div>
-                {auditArtifacts.length > 0 && (
+              
+              <SectionHeader 
+                icon={ShieldAlert} 
+                title="Execution Artifacts [ACT]"
+                helpText="These cards represent the final forensic judgment. Each card correlates to a turn in the conversation, highlighting if the AI agent adhered to the LFAS protocol."
+                rightElement={auditArtifacts.length > 0 && (
                   <div className="flex items-center gap-2 px-3 py-1 bg-indigo-500/10 rounded-full border border-indigo-500/20">
                     <span className="text-[10px] font-black text-indigo-300 uppercase">{auditArtifacts.length} Turns Captured</span>
                   </div>
                 )}
-              </div>
+              />
 
               {auditArtifacts.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
