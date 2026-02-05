@@ -1,0 +1,7 @@
+{
+  "name": "LFAS v4.1 KG Prompt Engine",
+  "description": "A forensic AI auditor and Knowledge Graph prompt engine using the LFAS (Listen-Reflect-Wait-Act-Acknowledge) protocol for high-fidelity reasoning and behavioral auditing.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
