@@ -104,6 +104,7 @@ const SectionHeader: React.FC<{
         )}
       </div>
       <div className="flex items-center gap-3">
+         {subtitle && <div className="text-[10px] text-gray-600 font-mono">{subtitle}</div>}
          {subtitle && <div className="text-[10px] text-gray-500 font-mono">{subtitle}</div>}
          {rightElement}
       </div>
@@ -315,7 +316,7 @@ const App: React.FC = () => {
           <button 
             onClick={handleReset}
             className="p-2 hover:bg-gray-800 rounded-lg transition-colors text-gray-400 hover:text-white"
-            title="Reset to initial state"
+          title="Reset to initia  l state"
           >
             <RefreshCcw size={18} />
           </button>
@@ -390,6 +391,18 @@ const App: React.FC = () => {
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500/20 via-purple-500/20 to-indigo-500/20 opacity-50"></div>
               
               <SectionHeader 
+                icon={Database} 
+                title="Knowledge Graph (JSON)" 
+                subtitle="Layer 1 Reference Data"
+                helpText="Define your audit scenario here. The KG structure dictates the nodes (entities) and edges (relationships) that the AI will analyze."
+              />
+
+              <textarea
+                value={kgJson}
+                onChange={(e) => setKgJson(e.target.value)}
+                className="flex-1 bg-[#080808] rounded-xl p-4 font-mono text-xs text-indigo-200/90 border border-gray-800/60 focus:border-indigo-500/40 outline-none resize-none scroll-smooth transition-colors selection:bg-indigo-500/30"
+                spellCheck={false}
+              />
                 icon={MessageSquareCode} 
                 title="Raw Messy / Stressed Input" 
                 subtitle="The Human Side of the Query"
@@ -456,6 +469,8 @@ const App: React.FC = () => {
               
               <SectionHeader 
                 icon={Activity} 
+                title="Relationship Mapping"
+                helpText="A live visualization of the Knowledge Graph nodes. Drag nodes to reorganize. Useful for verifying that your JSON structure makes sense visually."
                 title="Intent & Sentiment Mapping"
                 helpText="Deconstructed Knowledge Graph mapping emotional states to their target constraints and core goals. Drag nodes or hover to inspect deconstruction data."
                 rightElement={
@@ -465,6 +480,9 @@ const App: React.FC = () => {
                       placeholder="Filter nodes..."
                       value={filterTerm}
                       onChange={(e) => setFilterTerm(e.target.value)}
+                      className="bg-[#080808] border border-gray-800 rounded-lg py-1 px-8 text-[10px] font-mono text-indigo-200 focus:border-indigo-500/50 outline-none w-32 focus:w-48 transition-all placeholder-gray-700"
+                    />
+                    <Filter size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within:text-indigo-400" />
                       className="bg-[#080808] border border-gray-800 rounded-lg py-1 px-8 text-[10px] font-mono text-indigo-200 focus:border-indigo-500/50 outline-none w-32 focus:w-44 transition-all placeholder-gray-700"
                     />
                     <Filter size={11} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within:text-indigo-400" />
@@ -495,6 +513,11 @@ const App: React.FC = () => {
               
               <SectionHeader 
                 icon={Terminal} 
+                title="Protocol Header [REFLECT]"
+                helpText="Shows the AI's internal monologue and safety checks (Wait Gate) before it attempts to audit the transcript."
+              />
+
+              <div className="bg-[#080808] border border-gray-800/60 rounded-xl p-6 min-h-[150px] font-mono text-sm leading-relaxed text-indigo-100/80">
                 title="Cognitive Monologue Deconstruction [REFLECT]"
                 helpText="Shows the AI's parsed analysis of your emotional/cognitive state, and what your implicit, actual technical demands are behind the stress."
               />
@@ -531,6 +554,13 @@ const App: React.FC = () => {
 
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500/20 via-purple-500/20 to-indigo-500/20 opacity-50"></div>
               
+              <SectionHeader 
+                icon={ShieldAlert} 
+                title="Execution Artifacts [ACT]"
+                helpText="These cards represent the final forensic judgment. Each card correlates to a turn in the conversation, highlighting if the AI agent adhered to the LFAS protocol."
+                rightElement={auditArtifacts.length > 0 && (
+                  <div className="flex items-center gap-2 px-3 py-1 bg-indigo-500/10 rounded-full border border-indigo-500/20">
+                    <span className="text-[10px] font-black text-indigo-300 uppercase">{auditArtifacts.length} Turns Captured</span>
               <div className="flex flex-col md:flex-row items-start md:items-center justify-between border-b border-gray-800/80 pb-4 mb-4 gap-4">
                 <SectionHeader 
                   icon={Cpu} 
@@ -561,7 +591,7 @@ const App: React.FC = () => {
                     </button>
                   </div>
                 )}
-              </div>
+              />
 
               {optimizedResult ? (
                 <div className="flex-1 flex flex-col gap-4">
