@@ -1,0 +1,63 @@
+Set up Copilot — Step 2: Repository configuration for the Copilot coding agent
+Purpose
+
+Provide a repository-level configuration that the Copilot coding agent can use to understand how to build, test, and run this project and what to avoid or keep private.
+Overview
+
+Add two artifacts:
+A machine-readable config file (.github/copilot-agent.yml) with commands, ignore paths, and repository metadata.
+A human-readable instructions file (this file) describing what the config contains and why.
+Recommended config (example)
+
+Add the following YAML to .github/copilot-agent.yml. Adjust commands, branch and package manager to match this repository.
+# .github/copilot-agent.yml
+name: "LFASProtocol Copilot agent config"
+version: 1
+
+# Workspace and branch
+workspace_root: "."
+default_branch: "main"        # change to your repo's default branch if different
+
+# Tooling / commands
+package_manager: "npm"        # or "pnpm", "yarn", "maven", "pip", etc.
+install_command: "npm ci"
+build_command: "npm run build"
+test_command: "npm test --silent"
+start_command: "npm start"
+
+# Devcontainer / reproducible dev environment (optional)
+dev_container: ".devcontainer"   # path if you provide one
+
+# Paths and files to exclude from agent operations
+exclude_paths:
+  - "node_modules"
+  - "dist"
+  - "build"
+  - ".venv"
+  - ".git"
+
+# Files / directories treated as sensitive (do NOT attempt to read or return contents)
+sensitive_paths:
+  - ".env"
+  - ".secrets"
+  - "credentials.json"
+  - "private_keys/**"
+
+# Repo-level context, helpful for the agent and maintainers
+repo_context:
+  description: "LFAS v4.1 KG PROMPT ENGINE"
+  owner: "LFASProtocol"
+  contact: "maintainers@lfasprotocol.org"
+
+# Pull request defaults for agent-created PRs
+pull_request:
+  default_labels:
+    - "automation:copilot"
+    - "area:devops"
+  pr_template: ".github/PULL_REQUEST_TEMPLATE.md"
+
+# Onboarding notes for human reviewers
+onboarding_notes: |
+  - The agent should run `npm ci` and `npm test` before opening changes.
+  - Avoid editing files under `knowledge_graph/` unless the change includes tests and a data-migration plan.
+  - For schema or KG changes, reference the KG governance doc at docs/kg-governance.md
