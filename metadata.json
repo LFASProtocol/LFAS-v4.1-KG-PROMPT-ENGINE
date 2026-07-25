@@ -1,7 +1,10 @@
 {
-  "name": "LFAS v4.1 KG Prompt Engine",
-  "description": "A forensic AI auditor and Knowledge Graph prompt engine using the LFAS (Listen-Reflect-Wait-Act-Acknowledge) protocol for high-fidelity reasoning and behavioral auditing.",
+  "name": "Drama-Free Prompt Engine",
+  "description": "A professional AI prompt optimizer that translates messy, emotional, or exhausted inputs into highly structured, clean, and professional prompts, program-ready JSON schemas, and JSONL fine-tuning records.",
   "requestFramePermissions": [
     "microphone"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
   ]
 }

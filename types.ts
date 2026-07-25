@@ -26,20 +26,41 @@ export enum ExecutionState {
   ERROR = 'ERROR'
 }
 
-export interface AuditArtifact {
-  turn_id: number;
-  trigger_event: {
-    user_signal: string;
-    context_entropy: 'High' | 'Low';
+export interface PromptOptimizationResult {
+  sentiment: {
+    frustration_level: number; // 1-10
+    exhaustion_level: number; // 1-10
+    emotional_signals: string[];
+    dominant_tone: string;
   };
-  objective_trace: {
-    correct: string;
-    active: string;
-    hidden: string;
+  deconstruction: {
+    core_intent: string;
+    implicit_constraints: string[];
+    technical_context: string;
+    missing_parameters: string[];
   };
-  failure_detection: {
-    is_failure: boolean;
-    technical_label: string;
-    critical_label: string;
+  optimized_prompt: string;
+  json_payload: {
+    system_role: string;
+    instructions: string[];
+    context_variables: Record<string, string>;
+    format_specification: string;
   };
+  jsonl_record: string; // The single-line JSONL representation
 }
+
+export interface CompareMetrics {
+  rawTokensEstimated: number;
+  optimizedTokensEstimated: number;
+  noiseReductionPct: number;
+  accuracyBoostPct: number;
+  cognitiveOverheadAvoided: string;
+  productivityInsight: string;
+}
+
+export interface CompareResult {
+  rawOutput: string;
+  optimizedOutput: string;
+  metrics: CompareMetrics;
+}
+

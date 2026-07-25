@@ -1,5 +1,4 @@
-
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import { KnowledgeGraph } from '../types';
 
@@ -11,12 +10,32 @@ interface GraphVisualizationProps {
 const GraphVisualization: React.FC<GraphVisualizationProps> = ({ kg, filterTerm = '' }) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [dimensions, setDimensions] = useState({ width: 500, height: 320 });
+
+  // Dynamically observe container sizing to resolve initial 0px sizing issues
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      if (!entries || entries.length === 0) return;
+      const { width, height } = entries[0].contentRect;
+      setDimensions({
+        width: width || 500,
+        height: height || 320
+      });
+    });
+
+    resizeObserver.observe(containerRef.current);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, []);
 
   useEffect(() => {
     if (!svgRef.current || !containerRef.current || !kg.nodes.length) return;
 
-    const width = svgRef.current.clientWidth;
-    const height = svgRef.current.clientHeight;
+    const { width, height } = dimensions;
 
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove();
@@ -40,10 +59,10 @@ const GraphVisualization: React.FC<GraphVisualizationProps> = ({ kg, filterTerm 
       );
 
     const simulation = d3.forceSimulation<any>(nodes)
-      .force("link", d3.forceLink<any, any>(links).id(d => d.id).distance(120))
-      .force("charge", d3.forceManyBody().strength(-400))
+      .force("link", d3.forceLink<any, any>(links).id(d => d.id).distance(100))
+      .force("charge", d3.forceManyBody().strength(-300))
       .force("center", d3.forceCenter(width / 2, height / 2))
-      .force("collision", d3.forceCollide().radius(40));
+      .force("collision", d3.forceCollide().radius(45));
 
     const g = svg.append("g");
 
@@ -140,13 +159,13 @@ const GraphVisualization: React.FC<GraphVisualizationProps> = ({ kg, filterTerm 
     node.append("circle")
       .attr("r", 10)
       .attr("fill", d => {
-        const isUserRequest = d.id === 'USER_REQUEST';
+        const isUserRequest = d.id === 'USER_REQUEST' || d.id === 'RAW_INPUT';
         const isMatch = filterTerm && (d.id.toLowerCase().includes(filterTerm.toLowerCase()) || d.val.toLowerCase().includes(filterTerm.toLowerCase()));
         if (isMatch) return '#818cf8'; // indigo-400
         return isUserRequest ? '#6366f1' : '#111'; // indigo-500
       })
       .attr("stroke", d => {
-        const isUserRequest = d.id === 'USER_REQUEST';
+        const isUserRequest = d.id === 'USER_REQUEST' || d.id === 'RAW_INPUT';
         const isMatch = filterTerm && (d.id.toLowerCase().includes(filterTerm.toLowerCase()) || d.val.toLowerCase().includes(filterTerm.toLowerCase()));
         if (isMatch) return '#fff';
         return isUserRequest ? '#c7d2fe' : '#6366f1'; // indigo-200 : indigo-500
@@ -154,7 +173,7 @@ const GraphVisualization: React.FC<GraphVisualizationProps> = ({ kg, filterTerm 
       .attr("stroke-width", 2)
       .style("filter", d => {
         const matches = filterTerm && (d.id.toLowerCase().includes(filterTerm.toLowerCase()) || d.val.toLowerCase().includes(filterTerm.toLowerCase()));
-        return (d.id === 'USER_REQUEST' || matches) ? "drop-shadow(0 0 6px rgba(165, 180, 252, 0.5))" : "none";
+        return (d.id === 'USER_REQUEST' || d.id === 'RAW_INPUT' || matches) ? "drop-shadow(0 0 6px rgba(165, 180, 252, 0.5))" : "none";
       });
 
     node.append("text")
@@ -194,7 +213,7 @@ const GraphVisualization: React.FC<GraphVisualizationProps> = ({ kg, filterTerm 
       tooltip.remove();
     };
 
-  }, [kg, filterTerm]);
+  }, [dimensions, kg, filterTerm]);
 
   return (
     <div ref={containerRef} className="w-full h-full bg-[#080808] rounded-lg overflow-hidden border border-gray-800 relative">
